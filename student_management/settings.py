@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'students',
     'rest_framework',
     'rest_framework.authtoken',
+    'django_filters',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
