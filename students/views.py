@@ -7,8 +7,11 @@ from .models import Student
 from .serializers import StudentSerializer
 from django_filters import rest_framework as filters
 from rest_framework.pagination import PageNumberPagination
+import logging
 
 # Create your views here.
+
+# class method for filtering data 
 class StudentFilter(filters.FilterSet):
     first_name = filters.CharFilter(lookup_expr='icontains')
     last_name = filters.CharFilter(lookup_expr='icontains')
@@ -19,9 +22,11 @@ class StudentFilter(filters.FilterSet):
         model = Student
         fields = ['first_name', 'last_name', 'course', 'gpa']
 
+# class method for paginating data 
 class CustomPagination(PageNumberPagination):
-    page_size = 10
+    page_size = 10 # set page size here
     page_size_query_param = 'page_size'
+
 
 class StudentsViewSet(viewsets.ModelViewSet):
     serializer_class = StudentSerializer
@@ -31,7 +36,8 @@ class StudentsViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPagination
 
     def list(self, request):
-        queryset = self.get_queryset()
+        logging.info(f"Query parameters: {request.query_params}")
+        queryset = self.filter_queryset(self.get_queryset())  # Apply filters
         paginated_query_set = self.paginate_queryset(queryset)
         serializer = StudentSerializer(paginated_query_set, many=True)
         return self.get_paginated_response({

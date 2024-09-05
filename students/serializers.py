@@ -17,6 +17,7 @@ class StudentSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Name shouldnot have special characters.")
         return value
 
+    # Validate that gpa is between 0.0 and 4.0.
     def validate_gpa(self, value):
         if value < 0.0 or value > 4.0:
             raise serializers.ValidationError("GPA must be between 0.0 and 4.0")
