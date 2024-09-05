@@ -12,31 +12,38 @@ class StudentsViewSet(viewsets.ModelViewSet):
     serializer_class = StudentSerializer
     queryset = Student.objects.all()
 
-    def create(self, request, *args, **kwargs):
-        try:
-            response = super().create(request, *args, **kwargs)
-            return Response({
-                "message": "Student added successfully",
-                "status": status.HTTP_200_OK,
-                "data": response.data
-            }, status=status.HTTP_201_CREATED)
-        except ValidationError as e:
+def create(self, request, *args, **kwargs):
+    try:
+        response = super().create(request, *args, **kwargs)
+        return Response({
+            "message": "Student added successfully",
+            "status": status.HTTP_201_CREATED,
+            "data": response.data
+        }, status=status.HTTP_201_CREATED)
+    except ValidationError as e:
+        # Handle unique email error
+        if 'email' in e.detail:
             return Response({
                 "message": "Failed to add student",
                 "status": status.HTTP_400_BAD_REQUEST,
-                "errors": e.detail
+                "error": "A student with this email already exists."
             }, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({
-                "message": "An error occurred while adding the student",
-                "status": status.HTTP_500_INTERNAL_SERVER_ERROR,
-                "error": str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({
+            "message": "Failed to add student",
+            "status": status.HTTP_400_BAD_REQUEST,
+            "errors": e.detail
+        }, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({
+            "message": "An error occurred while adding the student",
+            "status": status.HTTP_500_INTERNAL_SERVER_ERROR,
+            "error": str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-    def partial_update(self, request, *args, **kwargs):
+    def update(self, request, *args, **kwargs):
         try:
-            response = super().partial_update(request, *args, **kwargs)
+            response = super().update(request, *args, **kwargs)
             return Response({
                 "message": "Student updated successfully",
                 "status": status.HTTP_200_OK,
