@@ -6,6 +6,7 @@ from rest_framework import status
 from .models import Student
 from .serializers import StudentSerializer
 from django_filters import rest_framework as filters
+from rest_framework.pagination import PageNumberPagination
 
 # Create your views here.
 class StudentFilter(filters.FilterSet):
@@ -18,12 +19,26 @@ class StudentFilter(filters.FilterSet):
         model = Student
         fields = ['first_name', 'last_name', 'course', 'gpa']
 
+class CustomPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+
 class StudentsViewSet(viewsets.ModelViewSet):
     serializer_class = StudentSerializer
     queryset = Student.objects.all()
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = StudentFilter
+    pagination_class = CustomPagination
 
+    def list(self, request):
+        queryset = self.get_queryset()
+        paginated_query_set = self.paginate_queryset(queryset)
+        serializer = StudentSerializer(paginated_query_set, many=True)
+        return self.get_paginated_response({
+            "students": serializer.data,
+            "status": status.HTTP_200_OK
+        })
+    
     def create(self, request, *args, **kwargs):
         try:
             response = super().create(request, *args, **kwargs)
